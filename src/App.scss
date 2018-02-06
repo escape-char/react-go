@@ -1,0 +1,66 @@
+body, html, #root{
+  height:100%;
+  width:100%;
+  background:#f9f9f9;
+}
+
+.App {
+  width:100%;
+  height:100%;
+  text-align: center;
+}
+.Go-logo{
+  margin-top:25px;
+  width:300px;
+}
+.Go-intro-title{
+  color:#4c4c4c;
+}
+.Go-intro-list{
+  list-style-type: none;
+  margin:auto;
+  width: 19em;
+}
+.Go-intro-item {
+  cursor:pointer;
+  color:white;
+  border: 1px solid lightgray;
+  background: #868a98;
+  padding:5px;
+  font-size: 1.3em;
+  margin-bottom:10px;
+}
+.Go-intro-item:hover{
+  background: #5c606b;
+}
+.App-header{
+  width:50%;
+  height:30px;
+  background:#eaeaea;
+  margin:auto;
+  margin-bottom:20px;
+
+  > .Go-back{
+    background:#9da8b3;
+    padding:7px;
+    color:white;
+    border: 1px solid lightgray;
+    position:relative;
+    float:left;
+  }
+  > .Go-reset{
+    background:#ea8282;
+    padding:7px;
+    border: 1px solid lightgray;
+    color:white;
+    position:relative;
+    float:right;
+  }
+}
+.App-title {
+  font-size: 1.5em;
+}
+
+.App-intro {
+  font-size: large;
+}

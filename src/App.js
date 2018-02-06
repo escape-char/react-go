@@ -6,37 +6,73 @@ import GoBoard from './common/go/model/goboard.js';
 import GoPoint from './common/go/model/gopoint.js';
 import {BoardConstants} from './common/constants.js';
 
-import './App.css';
+import image from './images/goboard.png';
+import './App.scss';
 
 class App extends Component {
   constructor(props){
       super(props);
-      this.goBoard = new GoBoard([], BoardConstants.SIZE_19);
-      console.log("App.constructor()");
-      console.log(this.goBoard.size);
-      this.controller = new GoController(this.goBoard);
+      this.goBoard = null; new GoBoard([], BoardConstants.SIZE_19);
+      this.controller = null;new GoController(this.goBoard);
       this.state = {
-        moves: this.goBoard.moves,
-        currentPlayer: this.controller.currentPlayer
+        showIntro: true,
+        moves: [],
+        boardSize: 0,
+        currentPlayer: ""
       }
       this.onPosSelected = this.onPosSelected.bind(this);
+      this.onBoardSizeSelected = this.onBoardSizeSelected.bind(this);
+      this.onBackClicked = this.onBackClicked.bind(this);
+      this.onResetClicked = this.onResetClicked.bind(this);
   }
   ComponenDidMount(){
   }
   onPosSelected(pos){
-    console.log("onPosSelected()");
     const pt = new GoPoint(pos, this.controller.currentPlayer);
-    console.log(pt);
     this.controller.makeMove(pt);
     this.setState({moves: this.goBoard.moves, currentPlayer: this.controller.currentPlayer});
 
   }
+  onBoardSizeSelected(size){
+    this.goBoard = new GoBoard([], size);
+    this.controller = new GoController(this.goBoard);
+    this.setState({boardSize:size, showIntro: false, currentPlayer: this.controller.currentPlayer});
+
+  }
+  onResetClicked(){
+    this.controller.reset();
+    this.setState({moves:this.goBoard.moves, currentPlayer: this.controller.currentPlayer});
+  }
+  onBackClicked(){
+    this.controller.reset();
+    this.setState({boardSize:0, showIntro:true});
+  }
   render() {
     return (
       <div className="App">
+        {!this.state.showIntro  &&
         <header className="App-header">
+          <button class="Go-back" onClick={this.onBackClicked}> Back </button>
+          <button class="Go-reset" onClick={this.onResetClicked}> Reset</button>
         </header>
-	      <GoCanvasComponent onPosSelected={this.onPosSelected} boardState={this.state}> </GoCanvasComponent>
+        }
+        {this.state.showIntro &&
+          <div>
+           <img className="Go-logo"src={image}></img>
+          <h3 class="Go-intro-title"> Choose a Board Size </h3>
+          <ul className="Go-intro-list">
+            <li className="Go-intro-item"
+              onClick={()=>this.onBoardSizeSelected(9)}> 9x9</li>
+            <li className="Go-intro-item"
+             onClick={()=>this.onBoardSizeSelected(13)}> 13x13</li>
+            <li className="Go-intro-item"
+              onClick={()=>this.onBoardSizeSelected(19)}> 19x19</li>
+          </ul>
+          </div>
+        }
+        {!this.state.showIntro &&
+	         <GoCanvasComponent onPosSelected={this.onPosSelected} boardState={this.state}> </GoCanvasComponent>
+        }
       </div>
     );
   }

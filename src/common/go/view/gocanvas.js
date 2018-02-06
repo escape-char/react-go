@@ -172,66 +172,58 @@ export default class GoCanvas{
         this._build();
         this.render();
     }
+    _render_intersections(){
+      this.boardD.draw(this.backgroundContext);
+      if(this.gameLayerDirty){
+          this.gameContext.clearRect(0, 0, this.uiLayer.width, this.uiLayer.height);
+          this.intersectionsD.draw(this.gameContext);
+          if(this.hitBoxes.debug){
+              this.hitBoxes.draw(this.gameContext);
+          }
+          this.hCoords.draw(this.gameContext);
+      }
+      this.vCoords.draw(this.gameContext);
+
+    }
+    _render_dragged_point(){
+      console.log("render_dragged_point");
+      console.log(this.draggedPoint);
+      console.log(this.currentPlayer);
+      if(this.draggedPoint){
+          if(this.blackStoneImgLoaded && this.whiteStoneImgLoaded){
+              if(this.currentPlayer === PlayerConstants.PLAYER_BLACK){
+                this.draggedPoint.setImage(this.blackStoneImg);
+              }else if(this.currentPlayer === PlayerConstants.PLAYER_WHITE){
+                this.draggedPoint.setImage(this.whiteStoneImg);
+              }
+          }
+
+          this.draggedPoint.draw(this.uiContext);
+      }
+
+    }
+    _render_moves(){
+      this.moves.forEach((v)=>{
+        const canvasPt = CanvasMath.posToPt(v.pos, this.startPoint, this.offset, this.boardSize);
+        const drawPt = Factory.createPoint(canvasPt.x, canvasPt.y, this.ptRadius, v.pos);
+
+        if(this.blackStoneImgLoaded && this.whiteStoneImgLoaded){
+          if(v.state === PointConstants.STATE_WHITE){
+            drawPt.setImage(this.whiteStoneImg);
+          }
+          else if(v.state === PointConstants.STATE_BLACK){
+            drawPt.setImage(this.blackStoneImg);
+          }
+        }
+        drawPt.draw(this.uiContext);
+      })
+
+    }
     _render(e){
         this.uiContext.clearRect(0, 0, this.uiLayer.width, this.uiLayer.height);
-
-        if(this.zoomed){
-                this.intersectionsD.transform = this.transformBoard;
-                this.hCoords.transform = [this.scale,0.,0,this.scale, this.transPt.x, 0];
-                this.vCoords.transform = [this.scale,0.,0,this.scale, 0, this.transPt.y];
-        }else{
-                this.hCoords.transform = null
-                this.vCoords.transform = null;
-                this.intersectionsD.transform = null;
-        }
-        this.boardD.draw(this.backgroundContext);
-        if(this.gameLayerDirty){
-            this.gameContext.clearRect(0, 0, this.uiLayer.width, this.uiLayer.height);
-            this.intersectionsD.draw(this.gameContext);
-            if(this.hitBoxes.debug){
-                this.hitBoxes.draw(this.gameContext);
-            }
-            this.hCoords.draw(this.gameContext);
-        }
-        this.vCoords.draw(this.gameContext);
-        console.log("currentPlayer: ");
-        console.log(this.currentPlayer);
-        if(this.draggedPoint){
-            console.log("dragged");
-            console.log(this.draggedPoint);
-            if(this.blackStoneImgLoaded && this.whiteStoneImgLoaded){
-                if(this.currentPlayer === PlayerConstants.PLAYER_BLACK){
-                  console.log("setting player black");
-                  this.draggedPoint.setImage(this.blackStoneImg);
-                }else if(this.currentPlayer === PlayerConstants.PLAYER_WHITE){
-                  console.log("setting player black");
-
-                  this.draggedPoint.setImage(this.whiteStoneImg);
-                }
-            }
-
-            this.draggedPoint.draw(this.uiContext);
-        }
-        console.log("moves");
-        console.log(this.moves);
-
-        this.moves.forEach((v)=>{
-          const canvasPt = CanvasMath.posToPt(v.pos, this.startPoint, this.offset, this.boardSize);
-          const drawPt = Factory.createPoint(canvasPt.x, canvasPt.y, this.ptRadius, v.pos);
-
-          if(this.blackStoneImgLoaded && this.whiteStoneImgLoaded){
-            if(v.state === PointConstants.STATE_WHITE){
-              console.log("drawing white")
-              drawPt.setImage(this.whiteStoneImg);
-            }
-            else if(v.state === PointConstants.STATE_BLACK){
-              console.log("drawing black");
-              drawPt.setImage(this.blackStoneImg);
-            }
-          }
-          drawPt.draw(this.uiContext);
-        })
-
+        this._render_intersections();
+        this._render_dragged_point();
+        this._render_moves();
     }
     render(){
         window.requestAnimationFrame(this._render.bind(this));
@@ -248,38 +240,9 @@ export default class GoCanvas{
     }
     _onDoubleClicked(target){
         /* TODO: Fix Zoom in functionality
-        this.gameLayerDirty = true;
-        this.singleClickTimer.cancel();
-        this.doubleClicked = true;
-        this.clickedCount = 0;
-        if(this.zoomed){
-            this.transPt = null;
-            this.transformBoard = null;
-            this.zoomed=false;
-            this.bMatrix = this.bMatrix.inverse();
-            this._transformHitBoxes(this.hitBoxes, this.bMatrix);
-            this.bMatrix.reset();
-            this.render();
-            return
-        }
-        this.zoomed = true;
-        const zPt = CanvasMath.posToPt(target.position, this.startPoint, this.offset, this.boardSize);
-
-        //zoom and center at target point
-        this.transPt = {
-            x: (zPt.x * (this.scale -1)) * -1 ,
-            y: (zPt.y * (this.scale -1)) * -1
-        };
-        //keep track of transformation matrix to apply on other entities
-        this.transformBoard = [this.scale,0.,0,this.scale, this.transPt.x, this.transPt.y];
-        this.bMatrix.reset();
-        this.bMatrix.transform(...this.transformBoard);
-        this._transformHitBoxes(this.hitBoxes, this.bMatrix);
-        this.render();
         */
     }
     onMouseUp(event){
-      console.log("onMouseUp");
       if(this.doubleClicked){
         return;
       }
@@ -321,31 +284,13 @@ export default class GoCanvas{
         this.render();
     }
     _onMouseMoveWhileZoomed(event){
-        const r= this.ptRadius * this.scale;
-        const ePt = CanvasMath.eventToPt(event, this.uiLayer);
-        const target = this.hitBoxes.collidedWith(ePt);
-
-        if(!target){
-            this.draggedPoint = null;
-            //this.render()
-            return;
-        }
-        const ptOrig = CanvasMath.posToPt(target.position, this.startPoint, this.offset, this.boardSize);
-        const ptTrans = this.bMatrix.applyToPoint(ptOrig.x, ptOrig.y);
-
-        const isPlayable = CanvasMath.isHitBoxPlayable(target, this.startPoint, this.borderSize);
-        this.isDragging = true;
-        this.draggedPoint = Factory.createPoint(ptTrans.x, ptTrans.y, r, target.position);
-        this.draggedPoint = isPlayable ? this.draggedPoint : null;
-        //this.render()
     }
     onMouseMove(event){
-        if(this.zoomed){
-            this._onMouseMoveWhileZoomed(event);
-            return;
-        }
+        console.log("onMouseMove");
         const pt = CanvasMath.eventToPt(event, this.uiLayer);
         const target = this.hitBoxes.collidedWith(pt);
+        console.log('target');
+        console.log(target);
         if(!target){
             this.draggedPoint = null;
             this.render()
@@ -354,6 +299,8 @@ export default class GoCanvas{
         this.isDragging = true;
         const hPt = CanvasMath.posToPt(target.position, this.startPoint, this.offset, this.boardSize);
         this.draggedPoint = Factory.createPoint(hPt.x, hPt.y, this.ptRadius, target.position);
+        console.log("dragged point");
+        console.log(this.draggedPoint);
         this.render()
     }
     onBgImgLoaded(){

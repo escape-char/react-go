@@ -16,7 +16,7 @@ export default class GoCanvasComponent extends React.Component {
   }
 
   componentDidMount(){
-     this.boardCanvas = new GoCanvas('go-canvas');
+     this.boardCanvas = new GoCanvas('go-canvas', this.props.boardSize);
      if(this.props.onPosSelected){
         this.boardCanvas.setPointSelectedCallback(this.props.onPosSelected);
         this.boardCanvas.setCurrentPlayer(this.props.boardState.currentPlayer);
@@ -24,12 +24,10 @@ export default class GoCanvasComponent extends React.Component {
       }
   }
   render() {
-    console.log("canvas.render()");
-    console.log(this.props);
-    console.log(this.boardCanvas);
     if(this.boardCanvas){
       this.boardCanvas.setCurrentPlayer(this.props.boardState.currentPlayer);
       this.boardCanvas.setMoves(this.props.boardState.moves);
+      this.boardCanvas.render();
     }
     return (
      <div className="go-canvas-container">
