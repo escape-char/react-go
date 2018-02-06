@@ -1,17 +1,17 @@
 import debounce  from 'lodash/debounce';
-import {CanvasConstants, BoardConstants} from '../../constants.js';
 import Logger from '../../logger.js';
 import {default as Factory} from './drawable/godrawablefactory.service.js';
 import {default as CanvasMath} from './gocanvasmath.js';
 import {default as Matrix} from './gotransformmatrix.js';
 import Utils from '../../utils.service.js';
-import {PlayerConstants, PointConstants} from '../../constants.js';
+import {CanvasConstants,PlayerConstants,
+  PointConstants, BoardConstants} from '../../constants.js';
 
 export default class GoCanvas{
     constructor(canvasId, boardSize, config){
         this.logger = new Logger("GoCanvas");
         const c = config || {};
-        this.boardSize = 9;
+        this.boardSize = boardSize || BoardConstants.SIZE_9;
         this._RENDER_TIME = 30;
         this.canvasId = canvasId || CanvasConstants.CANVAS_ID;
         this.ptRadius = 0;
